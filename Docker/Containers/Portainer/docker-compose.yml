@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - 9000:9000  # Access Portainer web interface on port 9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Connect to the Docker socket for managing containers
+    restart: always  # Restart the container automatically on failure
+
