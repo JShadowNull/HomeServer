@@ -24,7 +24,7 @@ else
 fi
 
 # Create a new container from the loaded image
-docker run -d --name $NEW_CONTAINER_NAME <IMAGE_NAME>
+docker run -d --name $NEW_CONTAINER_NAME $NEW_CONTAINER_NAME
 
 # Check if the new container was created successfully
 if [ $? -eq 0 ]; then
