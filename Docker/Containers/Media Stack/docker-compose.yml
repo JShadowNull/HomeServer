@@ -70,22 +70,22 @@ services:
     networks:
       - media_stack
 
-    jackett:
-        image: linuxserver/jackett:latest
-        container_name: jackett
-        volumes:
-            - /media/@data/jackett/config:/config
-            - /media/@data/jackett/downloads:/downloads
-            - /etc/localtime:/etc/localtime:ro
-        environment:
-            - PUID=1000
-            - PGID=1000
-            - TZ=America/New_York
-        networks:
-            - media_stack
-        expose:
-            - 9117
-        restart: always
-        
+  jackett:
+    image: linuxserver/jackett:latest
+    container_name: jackett
+    volumes:
+      - /media/@data/jackett/config:/config
+      - /media/@data/jackett/downloads:/downloads
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    networks:
+      - media_stack
+    expose:
+      - 9117
+    restart: always
+
 networks:
   media_stack:
