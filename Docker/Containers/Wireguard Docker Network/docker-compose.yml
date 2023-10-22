@@ -7,7 +7,7 @@ services:
     container_name: wireguard
     restart: unless-stopped
     networks:
-      - wg
+      - backbone
     volumes:
       - './wireguard:/config'
       - '/lib/modules:/lib/modules:ro'
@@ -22,5 +22,5 @@ services:
 
 
 networks:
-  wg:
+  backbone:
     driver: bridge
