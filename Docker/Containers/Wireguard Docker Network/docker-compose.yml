@@ -10,7 +10,7 @@ services:
       - wg
     volumes:
       - './wireguard:/config'
-      - './lib/modules:/lib/modules:ro'
+      - '/lib/modules:/lib/modules:ro'
     environment:
       - PUID=1000
       - PGID=1000
