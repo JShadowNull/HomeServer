@@ -8,7 +8,8 @@ services:
     volumes:
       - /media/data/radarr/config:/config
       - /media/data/Media/Movies:/movies
-      - /media/data/qbtorrent/downloads:/downloads
+      - /media/data/Media/Movies:/downloads/Movies
+      - /media/data/Media/TV:/downloads/tvshows
       - /etc/localtime:/etc/localtime:ro
     environment:
       - PUID=1000
