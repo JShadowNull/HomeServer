@@ -61,9 +61,8 @@ services:
       - TZ=Etc/UTC
       - WEBUI_PORT=8080
     volumes:
-      - /media/data/qbtorrent/config:/config
+      - /media/data/qbtorrent/config/mov:/config
       - /media/data/Media/Movies:/downloads/movies
-      - /media/data/Media/TV:/downloads/tvshows
 #     - /media/data/qbtorrent/downloads:/downloads old config 
     ports:
       - 8080:8080
@@ -72,7 +71,27 @@ services:
     restart: unless-stopped
     networks:
       - media_stack
-
+  
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - WEBUI_PORT=8181
+    volumes:
+      - /media/data/qbtorrent/config/tv:/config
+      - /media/data/Media/TV:/downloads/tvshows
+#     - /media/data/qbtorrent/downloads:/downloads old config 
+    ports:
+      - 8181:8181
+      - 6882:6881
+      - 6882:6881/udp
+    restart: unless-stopped
+    networks:
+      - media_stack
+  
   jackett:
     image: lscr.io/linuxserver/jackett:latest
     container_name: jackett
