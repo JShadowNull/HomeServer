@@ -61,7 +61,9 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - /media/data/qbtorrent/config:/config
-      - /media/data/qbtorrent/downloads:/downloads
+      - /media/data/Media/Movies:/downloads/movies
+      - /media/data/Media/TV:/downloads/tvshows
+#     - /media/data/qbtorrent/downloads:/downloads old config 
     ports:
       - 8080:8080
       - 6881:6881
