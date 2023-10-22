@@ -52,7 +52,7 @@ services:
       - 8096:8096
     restart: unless-stopped
 
-  qbittorrent:
+  qbittorrentmov:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     environment:
@@ -72,7 +72,7 @@ services:
     networks:
       - media_stack
   
-  qbittorrent:
+  qbittorrenttv:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     environment:
