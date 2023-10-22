@@ -1,40 +1,40 @@
 version: '3'
 services:
- radarr:
-  container_name: radarr
-  restart: unless-stopped
-  ports:
-   - 7878:7878
-  volumes:
-   - /media/@data/radarr/config:/config
-   - /media/@data/Media/Movies:/movies
-   - /media/@data/nzbget/downloads:/downloads
-   - /etc/localtime:/etc/localtime:ro
-  environment:
-   - PUID=1000
-   - PGID=1000
-   - TZ=America/New_York
-  image: linuxserver/radarr
-  networks:
-   - media_stack
+  radarr:
+    container_name: radarr
+    restart: unless-stopped
+    ports:
+      - 7878:7878
+    volumes:
+      - /media/@data/radarr/config:/config
+      - /media/@data/Media/Movies:/movies
+      - /media/@data/nzbget/downloads:/downloads
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    image: linuxserver/radarr
+    networks:
+      - media_stack
 
- sonarr:
-  image: linuxserver/sonarr
-  container_name: sonarr
-  restart: unless-stopped
-  ports:
-   - 8989:8989
-  volumes:
-   - /etc/localtime:/etc/localtime:ro
-   - /media/@data/sonarr/config:/config
-   - /media/@data/Media/TV:/tv
-   - /media/@data/qbtorrent/downloads:/downloads
-  environment:
-   - PUID=1000
-   - PGID=1000
-   - TZ=America/New_York
-  networks:
-   - media_stack
+  sonarr:
+    container_name: sonarr
+    restart: unless-stopped
+    ports:
+      - 8989:8989
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /media/@data/sonarr/config:/config
+      - /media/@data/Media/TV:/tv
+      - /media/@data/qbtorrent/downloads:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    image: linuxserver/sonarr
+    networks:
+      - media_stack
 
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
@@ -50,9 +50,7 @@ services:
     ports:
       - 8096:8096
     restart: unless-stopped
-    networks:
-      - media_stack
- 
+
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -74,5 +72,3 @@ services:
 
 networks:
   media_stack:
-
-
