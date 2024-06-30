@@ -1,0 +1,100 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    networks:
+      - frontend
+    ports:
+      - 80:80      # HTTP port
+      - 443:443    # HTTPS port
+      - 8082:8082  # Metrics port
+      - 81:81      # Custom port
+      - 444:444    # Custom port
+    environment:
+      CF_DNS_API_TOKEN_FILE: /run/secrets/cf_api_token
+      TRAEFIK_DASHBOARD_CREDENTIALS: ${TRAEFIK_DASHBOARD_CREDENTIALS}
+      TZ: America/New_York
+    secrets:
+      - cf_api_token
+    env_file: .env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/traefik.yml:/traefik.yml:ro
+      - ./data/acme.json:/acme.json
+      - ./data/config.yml:/config.yml:ro
+      - ./data/logs:/var/log/traefik
+      - /home/user/traefik/certs:/home  # Change '/home/user/' to the appropriate path
+    command:
+      - "--entrypoints.metrics.address=:8082"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.local.example.com`)"  # Change to your Traefik dashboard domain
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_DASHBOARD_CREDENTIALS}"
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.trusted-default-whitelist.ipAllowList.sourcerange=10.0.0.0/24,192.168.1.0/24"  # Change to your trusted IP ranges
+      - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+      - "traefik.http.routers.traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.local.example.com`)"  # Change to your Traefik dashboard domain
+      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth, trusted-default-whitelist"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=example.com"  # Change to your main domain
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.example.com"  # Change to your main domain wildcard
+      - "traefik.http.routers.traefik-secure.tls.domains[1].main=local.example.com"  # Change to your local domain
+      - "traefik.http.routers.traefik-secure.tls.domains[1].sans=*.local.example.com"  # Change to your local domain wildcard
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    environment:
+      GID: "${GID-1000}"
+      COLLECTIONS: "crowdsecurity/linux crowdsecurity/traefik"
+      TZ: America/New_York
+    volumes:
+      - ./acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ./db:/var/lib/crowdsec/data/
+      - ./config:/etc/crowdsec/
+      - /home/user/traefik/data/logs:/var/log/traefik/:ro  # Change '/home/user/' to the appropriate path
+    networks:
+      - frontend
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  bouncer-traefik:
+    image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
+    container_name: bouncer-traefik
+    environment:
+      CROWDSEC_BOUNCER_API_KEY: example_YOUR_API_KEY_HERE  # Change to your CrowdSec bouncer API key
+      CROWDSEC_AGENT_HOST: crowdsec:8080
+      TZ: America/New_York
+    networks:
+      - frontend
+    depends_on:
+      - crowdsec
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+#  cloudflared:
+#    image: cloudflare/cloudflared:latest
+#    container_name: cloudflared
+#    restart: unless-stopped
+#    networks:
+#      - frontend
+#    environment:
+#      TUNNEL_TOKEN: ${TUNNEL_TOKEN}  # Uncomment and change to your Cloudflare Tunnel token
+#    command: tunnel run
+
+secrets:
+  cf_api_token:
+    file: ./cf_api_token.txt  # Change to the path where your Cloudflare API token file is located
+
+networks:
+  frontend:
+    external: true

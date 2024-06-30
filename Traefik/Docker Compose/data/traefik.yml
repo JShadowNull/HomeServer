@@ -1,0 +1,81 @@
+api:
+  dashboard: true  # Enable Traefik dashboard
+  debug: true      # Enable debug mode for the dashboard
+
+entryPoints:
+  http:
+    address: ":80"
+    http:
+      redirections:
+        entrypoint:
+          to: https
+          scheme: https  # Redirect HTTP traffic to HTTPS
+  https:
+    address: ":443"
+  http-external:
+    address: ":81"
+    http:
+      redirections:
+        entrypoint:
+          to: https-external
+          scheme: https  # Redirect external HTTP traffic to external HTTPS
+  https-external:
+    address: ":444"
+  metrics:
+    address: ":8082"  # Metrics endpoint
+
+serversTransport:
+  insecureSkipVerify: true  # Skip verification of server certificates (useful for self-signed certs)
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false  # Do not expose containers by default
+  file:
+    filename: /config.yml  # Path to additional configuration file
+    watch: true  # Watch for changes in the configuration file
+
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: example@example.com  # Replace with your email address
+      storage: acme.json  # Path to store ACME certificates
+      caServer: https://acme-v02.api.letsencrypt.org/directory  # Let's Encrypt production server
+      dnsChallenge:
+        provider: cloudflare  # Use Cloudflare for DNS challenge
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
+
+metrics:
+  prometheus:
+    entryPoint: "metrics"
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.2
+      - 5.0
+    addRoutersLabels: true  # Add labels for routers in metrics
+    addServicesLabels: true  # Add labels for services in metrics
+
+log:
+  level: INFO  # Log level
+  filePath: "/var/log/traefik/traefik.log"  # Path to log file
+  format: common  # Log format
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"  # Path to access log file
+  format: json  # Access log format
+  filters:
+    statusCodes: ["200-299", "300-399"]  # Log only successful and redirection requests
+  fields:
+    defaultMode: keep  # Default mode for logging fields
+    headers:
+      defaultMode: drop  # Drop headers by default
+      names:
+        User-Agent: keep  # Keep User-Agent header
+        Referer: keep  # Keep Referer header
+        Cookie: drop  # Drop Cookie header
+    names:
+      ClientUsername: keep  # Keep client username field
+      ClientIP: keep  # Keep client IP field
