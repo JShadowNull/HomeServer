@@ -1,0 +1,158 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN  # Add network admin capabilities
+    privileged: true  # Run with privileged rights
+    volumes:
+      - /dev/net/tun:/dev/net/tun  # Volume for network tunneling
+    ports:
+      - "7878:7878"  # Radarr
+      - "8989:8989"  # Sonarr
+      - "5055:5055"  # Jellyseerr
+      - "8080:8080"  # qBittorrent MOV
+      - "6881:6881"  # qBittorrent MOV TCP
+      - "6881:6881/udp"  # qBittorrent MOV UDP
+      - "8181:8181"  # qBittorrent TV
+      - "6882:6881"  # qBittorrent TV TCP
+      - "6882:6881/udp"  # qBittorrent TV UDP
+      - "9117:9117"  # Jackett
+    environment:
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=wireguard
+      - VPN_ENDPOINT_IP=example_ip  # Replace with actual VPN endpoint IP
+      - VPN_ENDPOINT_PORT=example_port  # Replace with actual VPN endpoint port
+      - WIREGUARD_PUBLIC_KEY=example_public_key  # Replace with actual public key
+      - WIREGUARD_PRIVATE_KEY=example_private_key  # Replace with actual private key
+      - WIREGUARD_PRESHARED_KEY=example_preshared_key  # Replace with actual preshared key
+      - WIREGUARD_ADDRESSES=10.144.141.30/32
+    networks:
+      example_net:
+        ipv4_address: 172.19.0.7
+
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - JACKETT_PORT=9117  # Specify Jackett port
+    volumes:
+      - /path/to/jackett/config:/config  # Replace with actual path
+      - /path/to/jackett/downloads:/downloads  # Replace with actual path
+      - /etc/localtime:/etc/localtime:ro
+    network_mode: service:gluetun
+
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - RADARR_PORT=7878  # Specify Radarr port
+    volumes:
+      - /path/to/radarr/config:/config  # Replace with actual path
+      - /path/to/Media/Movies:/movies  # Replace with actual path
+      - /path/to/Media/Movies:/downloads/Movies  # Replace with actual path
+      - /path/to/Media/TV:/downloads/tvshows  # Replace with actual path
+
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - SONARR_PORT=8989  # Specify Sonarr port
+    volumes:
+      - /path/to/sonarr/config:/config  # Replace with actual path
+      - /path/to/Media/TV:/tv  # Replace with actual path
+      - /path/to/qbtorrent/downloads:/downloads  # Replace with actual path
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=America/New_York
+      - PORT=5055  # Specify Jellyseerr port
+    volumes:
+      - /path/to/jellyseerr/config:/app/config  # Replace with actual path
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    ports:
+      - "8096:8096"  # Jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /path/to/jellyfin/config:/config  # Replace with actual path
+      - /path/to/Media/TV:/data/tvshows  # Replace with actual path
+      - /path/to/Media/Movies:/data/movies  # Replace with actual path
+    restart: unless-stopped
+    networks:
+      example_net:
+
+  qbittorrentmov:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrentmov
+    restart: unless-stopped
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - WEBUI_PORT=8080  # Specify qBittorrent web UI port
+      - WEBUI_PASSWORD=example_YOUR_SECURE_PASSWORD_HERE  # Replace with actual YOUR_SECURE_PASSWORD_HERE
+      - WEBUI_USERNAME=admin
+    volumes:
+      - /path/to/qbtorrent/config/mov:/config  # Replace with actual path
+      - /path/to/Media/Movies:/downloads/movies  # Replace with actual path
+
+  qbittorrenttv:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrenttv
+    restart: unless-stopped
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - WEBUI_PORT=8181  # Specify qBittorrent web UI port
+      - WEBUI_PASSWORD=example_YOUR_SECURE_PASSWORD_HERE  # Replace with actual YOUR_SECURE_PASSWORD_HERE
+      - WEBUI_USERNAME=admin
+    volumes:
+      - /path/to/qbtorrent/config/tv:/config  # Replace with actual path
+      - /path/to/Media/TV:/downloads/tvshows  # Replace with actual path
+
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    ports:
+      - "9000:9000"  # Portainer
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+volumes:
+  portainer_data:
+
+networks:
+  example_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.19.0.0/24
