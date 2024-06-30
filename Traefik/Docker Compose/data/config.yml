@@ -1,0 +1,85 @@
+http:
+  #region routers 
+  routers:
+    example1:
+      entryPoints:
+        - "https-external"  # Entry point for external HTTPS traffic
+      rule: "Host(`example1.example.com`)"  # Replace with your domain
+      middlewares:
+        - https-redirectscheme  # Redirect HTTP to HTTPS
+        - default-headers  # Add default security headers
+        - auth  # Use forward auth for authentication
+      tls: {}  # Enable TLS
+      service: example1-service  # Reference to the service
+
+    example2:
+      entryPoints:
+        - "https"  # Entry point for internal HTTPS traffic
+      rule: "Host(`example2.local.example.com`)"  # Replace with your local domain
+      middlewares:
+        - https-redirectscheme  # Redirect HTTP to HTTPS
+        - default-headers  # Add default security headers
+        - trusted-default-whitelist  # Allow traffic only from trusted IP ranges
+      tls: {}  # Enable TLS
+      service: example2-service  # Reference to the service
+  #endregion
+
+  services:
+    example1-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.0.0.1:8000"  # Internal address of the service
+
+    example2-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.0.0.2:9000"  # Internal address of the service
+
+middlewares:
+  auth:
+    forwardAuth:
+      address: "http://authentik-server:9000/outpost.goauthentik.io/auth/traefik"
+      trustForwardHeader: true
+      authResponseHeaders:
+        - X-authentik-username
+        - X-authentik-groups
+        - X-authentik-email
+        - X-authentik-name
+        - X-authentik-uid
+        - X-authentik-jwt
+        - X-authentik-meta-jwks
+        - X-authentik-meta-outpost
+        - X-authentik-meta-provider
+        - X-authentik-meta-app
+        - X-authentik-meta-version
+
+  trusted-default-whitelist:
+    ipAllowList:
+      sourceRange:
+        - "10.0.0.0/24"  # Replace with your trusted IP ranges
+
+  https-redirectscheme:
+    redirectScheme:
+      scheme: https
+      permanent: true
+
+  default-headers:
+    headers:
+      frameDeny: true
+      browserXssFilter: true
+      contentTypeNosniff: true
+      forceSTSHeader: true
+      stsIncludeSubdomains: true
+      stsPreload: true
+      stsSeconds: 15552000
+      customFrameOptionsValue: SAMEORIGIN
+      customRequestHeaders:
+        X-Forwarded-Proto: https
+
+tls:
+  options:
+    mtls:
+      clientAuth:
+        caFiles:
+          - /path/to/your/ca-cert.pem  # Path to your CA certificate
+        clientAuthType: RequireAndVerifyClientCert
