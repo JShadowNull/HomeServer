@@ -15,10 +15,10 @@ services:
     volumes:
       - database:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: ${PG_PASS:?database YOUR_SECURE_PASSWORD_HERE required}
-      POSTGRES_USER: ${PG_USER:-example_user}
-      POSTGRES_DB: ${PG_DB:-example_db}
-      TZ: America/New_York
+      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_DB: ${PG_DB}
+      TZ: ${TZ}
     env_file:
       - .env
     networks:
@@ -36,22 +36,22 @@ services:
     volumes:
       - redis:/data
     environment:
-      TZ: America/New_York
+      TZ: ${TZ}
     networks:
       frontend:
   server:
-    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-latest}
+    image: ${AUTHENTIK_IMAGE}:${AUTHENTIK_TAG}
     container_name: authentik-server
     restart: unless-stopped
     command: server
     environment:
       AUTHENTIK_REDIS__HOST: redis
       AUTHENTIK_POSTGRESQL__HOST: postgresql
-      AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-example_user}
-      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-example_db}
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
-      TZ: America/New_York
+      TZ: ${TZ}
     volumes:
       - ./media:/media
       - ./custom-templates:/templates
@@ -67,25 +67,25 @@ services:
 
       # External HTTP Router
       - "traefik.http.routers.authentik.entrypoints=http-external"
-      - "traefik.http.routers.authentik.rule=Host(`authentik.example.com`) || (HostRegexp(`{YOUR_SUBDOMAIN_HERE:[A-Za-z0-9](?:[A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?}.example.com`) && PathPrefix(`/outpost.goauthentik.io/`))"
+      - "traefik.http.routers.authentik.rule=Host(`authentik.${TRAEFIK_DOMAIN}`) || (HostRegexp(`{YOUR_SUBDOMAIN_HERE:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?}.${TRAEFIK_DOMAIN}`) && PathPrefix(`/outpost.goauthentik.io/`))"
       - "traefik.http.middlewares.authentik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.authentik.middlewares=authentik-https-redirect"
 
       # External HTTPS Router
       - "traefik.http.routers.authentik-secure.entrypoints=https-external"
-      - "traefik.http.routers.authentik-secure.rule=Host(`authentik.example.com`)"
+      - "traefik.http.routers.authentik-secure.rule=Host(`authentik.${TRAEFIK_DOMAIN}`)"
       - "traefik.http.routers.authentik-secure.tls=true"
       - "traefik.http.routers.authentik-secure.service=authentik"
 
       # Internal HTTP Router
       - "traefik.http.routers.authentik-local.entrypoints=http"
-      - "traefik.http.routers.authentik-local.rule=Host(`authentik.local.example.com`) || (HostRegexp(`{YOUR_SUBDOMAIN_HERE:[A-Za-z0-9](?:[A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?}.local.example.com`) && PathPrefix(`/outpost.goauthentik.io/`))"
+      - "traefik.http.routers.authentik-local.rule=Host(`authentik.${TRAEFIK_LOCAL_DOMAIN}`) || (HostRegexp(`{YOUR_SUBDOMAIN_HERE:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?}.${TRAEFIK_LOCAL_DOMAIN}`) && PathPrefix(`/outpost.goauthentik.io/`))"
       - "traefik.http.middlewares.authentik-https-redirect-local.redirectscheme.scheme=https"
       - "traefik.http.routers.authentik-local.middlewares=authentik-https-redirect-local"
 
       # Internal HTTPS Router
       - "traefik.http.routers.authentik-secure-local.entrypoints=https"
-      - "traefik.http.routers.authentik-secure-local.rule=Host(`authentik.local.example.com`)"
+      - "traefik.http.routers.authentik-secure-local.rule=Host(`authentik.${TRAEFIK_LOCAL_DOMAIN}`)"
       - "traefik.http.routers.authentik-secure-local.tls=true"
       - "traefik.http.routers.authentik-secure-local.service=authentik"
 
@@ -96,17 +96,17 @@ services:
       - "traefik.docker.network=frontend"
 
   worker:
-    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-latest}
+    image: ${AUTHENTIK_IMAGE}:${AUTHENTIK_TAG}
     restart: unless-stopped
     command: worker
     environment:
       AUTHENTIK_REDIS__HOST: redis
       AUTHENTIK_POSTGRESQL__HOST: postgresql
-      AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-example_user}
-      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-example_db}
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
-      TZ: America/New_York
+      TZ: ${TZ}
     user: root
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
