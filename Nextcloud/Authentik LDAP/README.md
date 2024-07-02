@@ -1,6 +1,6 @@
 # Nextcloud LDAP/AD Integration Guide
 
-This guide provides step-by-step instructions for integrating LDAP/AD with Nextcloud.
+This guide provides step-by-step instructions for integrating  Authentik LDAP/AD with Nextcloud.
 
 ## Server Configuration
 
