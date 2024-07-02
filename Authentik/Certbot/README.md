@@ -74,7 +74,6 @@ Test the renewal process with:
 sudo certbot renew --dry-run
 ```
 
-
 Reload your web server to apply the changes.
 
 ### 6. Optional: Renew Certificates Manually
@@ -88,7 +87,7 @@ sudo certbot renew
 
 To automate the process of copying the certificates to the desired directory, create a script named `copy_certs.sh`:
 
-Create the file `copy_certs.sh` in the /etc/letsencrypt/renewal-hooks/post directory. This is nessescary for authentik to get certbot certs in /certs directory:
+Create the file `copy_certs.sh` in the /etc/letsencrypt/renewal-hooks/post directory. This is necessary for Authentik to get Certbot certs in /certs directory:
 ```bash
 #!/bin/bash
 
@@ -100,20 +99,22 @@ DEST_DIR="/path/to/destination"
 # Copy the certificates
 cp $CERT_DIR/fullchain.pem $DEST_DIR/fullchain.pem
 cp $CERT_DIR/privkey.pem $DEST_DIR/privkey.pem
-
+```
 
 Make the script executable:
 ```bash
 sudo chmod +x copy_certs.sh
 ```
 
-Layout for authentik /certs directory should be:
+### Authentik /certs Directory Layout
 
--certs
-    -- example.com
-        -- cert1
-        -- cert2
-        -- cert3
-        -- cert4
+The layout for the Authentik `/certs` directory should be:
 
-    
+```
+- certs
+  - example.com
+    - cert1
+    - cert2
+    - cert3
+    - cert4
+```
