@@ -4,7 +4,7 @@ This guide provides step-by-step instructions for integrating LDAP/AD with Nextc
 
 ## Server Configuration
 
-![Server Configuration](image.png)
+![Server Configuration](.readme/image.png)
 
 In the Server tab, configure the LDAP server details:
 - Server: `ldap://example.com`
@@ -14,7 +14,7 @@ In the Server tab, configure the LDAP server details:
 
 ## Users
 
-![Users](image-3.png)
+![Users](.readme/image-3.png)
 
 In the Users tab, configure:
 - Object classes: `inetOrgPerson`
@@ -22,7 +22,7 @@ In the Users tab, configure:
 
 ## Login Attributes
 
-![Login Attributes](image-2.png)
+![Login Attributes](.readme/image-2.png)
 
 In the Login Attributes tab, set the attributes:
 - LDAP/AD Username: `cn`
@@ -32,14 +32,14 @@ In the Login Attributes tab, set the attributes:
 
 ## Groups
 
-![Groups](image-4.png)
+![Groups](.readme/image-4.png)
 
 In the Groups tab, set the group filter:
 - LDAP Filter: `(|(cn=<your group>))`
 
 ## Directory Settings
 
-![Directory Settings](image-5.png)
+![Directory Settings](.readme/image-5.png)
 
 In the Directory Settings tab, configure:
 - User Display Name Field: `displayname`
@@ -49,7 +49,7 @@ In the Directory Settings tab, configure:
 
 ## Expert Settings
 
-![Expert Settings](image-6.png)
+![Expert Settings](.readme/image-6.png)
 
 In the Expert tab, configure:
 - Internal Username Attribute: `cn`
@@ -57,7 +57,7 @@ In the Expert tab, configure:
 
 ## Writing Settings
 
-![Writing Settings](image-7.png)
+![Writing Settings](.readme/image-7.png)
 
 In the Writing tab, configure:
 - Prevent fallback to other backends when creating users or groups.
