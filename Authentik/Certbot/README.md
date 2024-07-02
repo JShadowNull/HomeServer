@@ -92,8 +92,8 @@ Create the file `copy_certs.sh` in the /etc/letsencrypt/renewal-hooks/post direc
 #!/bin/bash
 
 # Define source and destination directories
-SOURCE_DIR="/etc/letsencrypt/live/ubuntuserver.buzz/"
-DEST_DIR="/home/jake/authentik/certs/ubuntuserver.buzz/"
+SOURCE_DIR="/etc/letsencrypt/live/example.com/"
+DEST_DIR="/path/to/certs/example.com/"
 
 # Check if source directory exists
 if [ ! -d "$SOURCE_DIR" ]; then
@@ -112,11 +112,11 @@ chmod -R 0777 "$DEST_DIR"
 cp -L "$SOURCE_DIR"* "$DEST_DIR"
 
 # Restore locked-down permissions after the copy
-chown -R jake:jake "$DEST_DIR"
+chown -R <your user>:<your user> "$DEST_DIR"
 chmod -R 0755 "$DEST_DIR"
 
 # Set permissions on the /certs directory
-chown -R jake:jake "$(dirname "$(dirname "$DEST_DIR")")"
+chown -R <your user>:<your user> "$(dirname "$(dirname "$DEST_DIR")")"
 chmod -R 0755 "$(dirname "$(dirname "$DEST_DIR")")"
 
 # Verify permissions
