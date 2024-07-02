@@ -1,12 +1,24 @@
-version: '3'
-
 services:
   portainer:
-    image: portainer/portainer-ce:latest
+    image: portainer/portainer-ee:latest
     container_name: portainer
+    restart: always
     ports:
-      - 9000:9000  # Access Portainer web interface on port 9000
+      - "8000:8000"
+      - "9000:9000"  # This port is for HTTP access to the Portainer web interface
+      # Uncomment the following line to use HTTPS access instead of HTTP
+      # - "9443:9443"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock  # Connect to the Docker socket for managing containers
-    restart: always  # Restart the container automatically on failure
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+      # Uncomment the following lines to enable SSL certificate configuration
+      # - /path/to/certificate.crt:/certs/cert.crt
+      # - /path/to/private.key:/certs/cert.key
+    environment:
+      # Uncomment the following lines to configure Portainer for SSL
+      # - "HTTPS_ENABLED=true"
+      # - "SSL_CERT=/certs/cert.crt"
+      # - "SSL_KEY=/certs/cert.key"
 
+volumes:
+  portainer_data:
