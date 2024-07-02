@@ -81,16 +81,6 @@ services:
     security_opt:
       - no-new-privileges:true
 
-#  cloudflared:
-#    image: cloudflare/cloudflared:latest
-#    container_name: cloudflared
-#    restart: unless-stopped
-#    networks:
-#      - frontend
-#    environment:
-#      TUNNEL_TOKEN: ${TUNNEL_TOKEN}  # Uncomment and change to your Cloudflare Tunnel token
-#    command: tunnel run
-
 secrets:
   cf_api_token:
     file: ./cf_api_token.txt  # Change to the path where your Cloudflare API token file is located
