@@ -15,10 +15,12 @@ Ensure your directory structure is as follows:
 
 ```
 Traefik/
-├── acme.json
-├── config.yml
+├── data/
+│   ├── acme.json
+│   ├── config.yml
+│   ├── traefik.yml
 ├── docker-compose.yml
-└── dynamic.yml
+└── .env
 ```
 
 ## Step-by-Step Guide
@@ -37,46 +39,81 @@ cd HomeServer/Traefik
 Create the `acme.json` file which Traefik will use to store SSL certificates:
 
 ```bash
-touch acme.json
-chmod 600 acme.json
+touch data/acme.json
+chmod 600 data/acme.json
 ```
 
 ### 3. Update Configuration Files
 
-#### `config.yml`
+#### `data/traefik.yml`
 
-Update the `config.yml` file with your desired settings. This file contains static configuration for Traefik.
+Update the `data/traefik.yml` file with your desired settings. This file contains the main configuration for Traefik.
 
-#### `dynamic.yml`
+#### `data/config.yml`
 
-Update the `dynamic.yml` file with your desired settings. This file contains dynamic configuration for Traefik.
+Update the `data/config.yml` file with your desired settings. This file contains additional dynamic configuration for Traefik.
 
 ### 4. Docker Compose Configuration
 
 The `docker-compose.yml` file should look like this:
 
 ```yaml
-version: '3.7'
-
 services:
   traefik:
-    image: traefik:v2.9
+    image: traefik:latest
     container_name: traefik
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik.toml:/etc/traefik/traefik.toml
-      - ./config.yml:/etc/traefik/config.yml
-      - ./dynamic.yml:/etc/traefik/dynamic.yml
-      - ./acme.json:/acme.json
+    restart: unless-stopped
     networks:
-      - traefik
+      - frontend
+    ports:
+      - 80:80      # HTTP port
+      - 443:443    # HTTPS port
+      - 8082:8082  # Metrics port
+      - 81:81      # Custom port
+      - 444:444    # Custom port
+    environment:
+      CF_DNS_API_TOKEN_FILE: /run/secrets/cf_api_token
+      TRAEFIK_DASHBOARD_CREDENTIALS: ${TRAEFIK_DASHBOARD_CREDENTIALS}
+      TZ: America/New_York
+    secrets:
+      - cf_api_token
+    env_file: .env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/traefik.yml:/traefik.yml:ro
+      - ./data/acme.json:/acme.json
+      - ./data/config.yml:/config.yml:ro
+      - ./data/logs:/var/log/traefik
+      - /home/user/traefik/certs:/home  # Change '/home/user/' to the appropriate path
+    command:
+      - "--entrypoints.metrics.address=:8082"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.local.example.com`)"  # Change to your Traefik dashboard domain
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_DASHBOARD_CREDENTIALS}"
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.trusted-default-whitelist.ipAllowList.sourcerange=10.0.0.0/24,192.168.1.0/24"  # Change to your trusted IP ranges
+      - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+      - "traefik.http.routers.traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.local.example.com`)"  # Change to your Traefik dashboard domain
+      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth, trusted-default-whitelist"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=example.com"  # Change to your main domain
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.example.com"  # Change to your main domain wildcard
+      - "traefik.http.routers.traefik-secure.tls.domains[1].main=local.example.com"  # Change to your local domain
+      - "traefik.http.routers.traefik-secure.tls.domains[1].sans=*.local.example.com"  # Change to your local domain wildcard
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+
+secrets:
+  cf_api_token:
+    file: ./cf_api_token.txt  # Change to the path where your Cloudflare API token file is located
 
 networks:
-  traefik:
+  frontend:
     external: true
 ```
 
@@ -94,8 +131,8 @@ You can access the Traefik dashboard by navigating to `http://<your-server-ip>:8
 
 ## Additional Information
 
-- Ensure you have the correct permissions set for `acme.json`.
-- You can configure middlewares, routers, and services in the `dynamic.yml` file according to your needs.
+- Ensure you have the correct permissions set for `data/acme.json`.
+- You can configure middlewares, routers, and services in the `data/config.yml` file according to your needs.
 - For more information on Traefik configuration, refer to the [official Traefik documentation](https://doc.traefik.io/traefik/).
 
 ## Troubleshooting
