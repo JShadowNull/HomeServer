@@ -35,7 +35,7 @@ This guide will help you set up and run the provided Docker Compose configuratio
    PUID=1000
    PGID=1000
    TZ=America/New_York
-   WEBUI_PASSWORD=example_YOUR_SECURE_PASSWORD_HERE
+   WEBUI_PASSWORD=example_password
    WEBUI_USERNAME=admin
    ```
 

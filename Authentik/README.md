@@ -53,7 +53,7 @@ Use the provided `copy_certs.sh` script to automate this process.
 
 2. **Create Password Stage**:
    - Navigate to **Flows & Stages** -> **Stages** -> **Create**.
-   - Name it `ldap-authentication-YOUR_SECURE_PASSWORD_HERE` and leave the defaults.
+   - Name it `ldap-authentication-password` and leave the defaults.
 
 3. **Create User Login Stage**:
    - Navigate to **Flows & Stages** -> **Stages** -> **Create**.
@@ -63,7 +63,7 @@ Use the provided `copy_certs.sh` script to automate this process.
    - Navigate to **Flows & Stages** -> **Flows** -> **Create**.
    - Name it `ldap-authentication-flow`.
    - Bind the stages: `ldap-identification-stage` (order: 10) and `ldap-authentication-login` (order: 30).
-   - Edit `ldap-identification-stage` to change the Password stage to `ldap-authentication-YOUR_SECURE_PASSWORD_HERE`.
+   - Edit `ldap-identification-stage` to change the Password stage to `ldap-authentication-password`.
 
 ### 5. Create LDAP Provider
 
@@ -89,7 +89,7 @@ Use the provided `copy_certs.sh` script to automate this process.
 Use `ldapsearch` to test connectivity:
 
 ```bash
-ldapsearch   -x   -H ldap://<LDAP Outpost IP address>:389   -D 'cn=ldapservice,ou=users,dc=example,dc=com'   -w '<ldapuserYOUR_SECURE_PASSWORD_HERE>'   -b 'dc=example,dc=com'   '(objectClass=user)'
+ldapsearch   -x   -H ldap://<LDAP Outpost IP address>:389   -D 'cn=ldapservice,ou=users,dc=example,dc=com'   -w '<ldapuserpassword>'   -b 'dc=example,dc=com'   '(objectClass=user)'
 ```
 
 ## Conclusion

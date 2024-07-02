@@ -70,7 +70,7 @@ services:
     image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
     container_name: bouncer-traefik
     environment:
-      CROWDSEC_BOUNCER_API_KEY: example_YOUR_API_KEY_HERE  # Change to your CrowdSec bouncer API key
+      CROWDSEC_BOUNCER_API_KEY: example_api_key  # Change to your CrowdSec bouncer API key
       CROWDSEC_AGENT_HOST: crowdsec:8080
       TZ: America/New_York
     networks:

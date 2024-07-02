@@ -45,8 +45,8 @@ display_title "User Creation Script"
 # Prompt for username
 read -p "Enter the username for the new user: " username
 
-# Prompt for YOUR_SECURE_PASSWORD_HERE
-read -s -p "Enter a YOUR_SECURE_PASSWORD_HERE for $username: " YOUR_SECURE_PASSWORD_HERE
+# Prompt for password
+read -s -p "Enter a password for $username: " password
 echo
 
 # Prompt for sudo privileges
@@ -58,11 +58,11 @@ if id "$username" &>/dev/null; then
     exit 1
 fi
 
-# Create the user with the provided YOUR_SECURE_PASSWORD_HERE and home directory
-sudo adduser --disabled-YOUR_SECURE_PASSWORD_HERE --gecos "" "$username"
+# Create the user with the provided password and home directory
+sudo adduser --disabled-password --gecos "" "$username"
 
-# Set the YOUR_SECURE_PASSWORD_HERE for the new user
-echo "$username:$YOUR_SECURE_PASSWORD_HERE" | sudo chpasswd
+# Set the password for the new user
+echo "$username:$password" | sudo chpasswd
 
 # Check if sudo privileges should be granted
 if [[ "$grant_sudo" == [yY] || "$grant_sudo" == [yY][eE][sS] ]]; then
@@ -81,5 +81,5 @@ echo "User '$username' has been created."
 ## Notes
 
 - The script checks if the username already exists on the system to avoid conflicts.
-- The YOUR_SECURE_PASSWORD_HERE for the new user is set during the script execution.
+- The password for the new user is set during the script execution.
 - The user can be optionally granted sudo privileges based on the input provided.

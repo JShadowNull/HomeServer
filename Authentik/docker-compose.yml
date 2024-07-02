@@ -67,7 +67,7 @@ services:
 
       # External HTTP Router
       - "traefik.http.routers.authentik.entrypoints=http-external"
-      - "traefik.http.routers.authentik.rule=Host(`authentik.${TRAEFIK_DOMAIN}`) || (HostRegexp(`{YOUR_SUBDOMAIN_HERE:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?}.${TRAEFIK_DOMAIN}`) && PathPrefix(`/outpost.goauthentik.io/`))"
+      - "traefik.http.routers.authentik.rule=Host(`authentik.${TRAEFIK_DOMAIN}`) || (HostRegexp(`{subdomain:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?}.${TRAEFIK_DOMAIN}`) && PathPrefix(`/outpost.goauthentik.io/`))"
       - "traefik.http.middlewares.authentik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.authentik.middlewares=authentik-https-redirect"
 
@@ -79,7 +79,7 @@ services:
 
       # Internal HTTP Router
       - "traefik.http.routers.authentik-local.entrypoints=http"
-      - "traefik.http.routers.authentik-local.rule=Host(`authentik.${TRAEFIK_LOCAL_DOMAIN}`) || (HostRegexp(`{YOUR_SUBDOMAIN_HERE:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?}.${TRAEFIK_LOCAL_DOMAIN}`) && PathPrefix(`/outpost.goauthentik.io/`))"
+      - "traefik.http.routers.authentik-local.rule=Host(`authentik.${TRAEFIK_LOCAL_DOMAIN}`) || (HostRegexp(`{subdomain:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?}.${TRAEFIK_LOCAL_DOMAIN}`) && PathPrefix(`/outpost.goauthentik.io/`))"
       - "traefik.http.middlewares.authentik-https-redirect-local.redirectscheme.scheme=https"
       - "traefik.http.routers.authentik-local.middlewares=authentik-https-redirect-local"
 

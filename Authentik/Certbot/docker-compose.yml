@@ -15,7 +15,7 @@ services:
     volumes:
       - database:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: ${PG_PASS:?database YOUR_SECURE_PASSWORD_HERE required}
+      POSTGRES_PASSWORD: ${PG_PASS:?database password required}
       POSTGRES_USER: ${PG_USER:-example_user}
       POSTGRES_DB: ${PG_DB:-example_db}
       TZ: America/New_York
@@ -67,7 +67,7 @@ services:
 
       # External HTTP Router
       - "traefik.http.routers.authentik.entrypoints=http-external"
-      - "traefik.http.routers.authentik.rule=Host(`authentik.example.com`) || (HostRegexp(`{YOUR_SUBDOMAIN_HERE:[A-Za-z0-9](?:[A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?}.example.com`) && PathPrefix(`/outpost.goauthentik.io/`))"
+      - "traefik.http.routers.authentik.rule=Host(`authentik.example.com`) || (HostRegexp(`{subdomain:[A-Za-z0-9](?:[A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?}.example.com`) && PathPrefix(`/outpost.goauthentik.io/`))"
       - "traefik.http.middlewares.authentik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.authentik.middlewares=authentik-https-redirect"
 
@@ -79,7 +79,7 @@ services:
 
       # Internal HTTP Router
       - "traefik.http.routers.authentik-local.entrypoints=http"
-      - "traefik.http.routers.authentik-local.rule=Host(`authentik.local.example.com`) || (HostRegexp(`{YOUR_SUBDOMAIN_HERE:[A-Za-z0-9](?:[A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?}.local.example.com`) && PathPrefix(`/outpost.goauthentik.io/`))"
+      - "traefik.http.routers.authentik-local.rule=Host(`authentik.local.example.com`) || (HostRegexp(`{subdomain:[A-Za-z0-9](?:[A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?}.local.example.com`) && PathPrefix(`/outpost.goauthentik.io/`))"
       - "traefik.http.middlewares.authentik-https-redirect-local.redirectscheme.scheme=https"
       - "traefik.http.routers.authentik-local.middlewares=authentik-https-redirect-local"
 
