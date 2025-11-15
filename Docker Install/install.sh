@@ -3,7 +3,28 @@
 # Exit on error
 set -e
 
-echo "Starting Docker Engine installation for Ubuntu..."
+echo "Starting Docker Engine installation..."
+
+# Detect OS
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+else
+    echo "Error: Cannot detect OS. /etc/os-release not found."
+    exit 1
+fi
+
+# Validate OS support
+case "$OS" in
+    ubuntu|debian)
+        echo "Detected OS: $PRETTY_NAME"
+        ;;
+    *)
+        echo "Error: This script only supports Ubuntu and Debian."
+        echo "Detected OS: $PRETTY_NAME"
+        exit 1
+        ;;
+esac
 
 # Remove conflicting packages
 echo "Removing conflicting packages..."
@@ -20,15 +41,17 @@ sudo apt-get install -y ca-certificates curl
 echo "Setting up Docker repository..."
 sudo install -m 0755 -d /etc/apt/keyrings
 
-# Add Docker's official GPG key
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+# Add Docker's official GPG key (OS-specific URL)
+echo "Adding Docker GPG key..."
+sudo curl -fsSL https://download.docker.com/linux/${OS}/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 # Add Docker's repository using DEB822 format (recommended)
+echo "Configuring Docker repository..."
 sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null <<EOF
 Types: deb
-URIs: https://download.docker.com/linux/ubuntu
-Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+URIs: https://download.docker.com/linux/${OS}
+Suites: ${VERSION_CODENAME}
 Components: stable
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
