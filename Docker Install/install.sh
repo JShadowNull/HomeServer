@@ -32,6 +32,13 @@ for pkg in docker.io docker-compose docker-compose-v2 docker-doc podman-docker c
     sudo apt-get remove -y $pkg 2>/dev/null || true
 done
 
+# Remove old Docker repository configurations
+echo "Cleaning up old Docker repository configurations..."
+sudo rm -f /etc/apt/sources.list.d/docker.list
+sudo rm -f /etc/apt/sources.list.d/docker.sources
+sudo rm -f /etc/apt/keyrings/docker.asc
+sudo rm -f /etc/apt/keyrings/docker.gpg
+
 # Update package index and install required packages
 echo "Installing prerequisites..."
 sudo apt-get update
