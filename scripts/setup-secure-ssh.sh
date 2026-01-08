@@ -32,9 +32,7 @@ ssh-keygen -t ed25519 -f "$TEMP_KEY" -N "" -C "$(whoami)@$(hostname)"
 
 echo -e "\n${GREEN}=== PRIVATE KEY (save this to your Mac) ===${NC}"
 echo -e "${YELLOW}Save this as ~/.ssh/id_ed25519 on your Mac:${NC}"
-echo "----BEGIN PRIVATE KEY----"
 cat "$TEMP_KEY"
-echo "----END PRIVATE KEY----"
 
 echo -e "\n${GREEN}=== PUBLIC KEY (adding to this server) ===${NC}"
 cat "$TEMP_KEY.pub" >> ~/.ssh/authorized_keys
