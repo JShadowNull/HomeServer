@@ -1,1 +1,1 @@
-your_cloudflare_api_token
+REPLACE_WITH_YOUR_CLOUDFLARE_API_TOKEN

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Pre-commit hook to validate README.md consistency
-# This ensures README stays in sync with actual repository structure
+# Pre-commit hook to validate README.md consistency and security
+# This ensures README stays in sync with repository structure and no secrets are committed
 
 set -euo pipefail
 
@@ -9,21 +9,39 @@ set -euo pipefail
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo -e "${YELLOW}Running pre-commit README validation...${NC}"
+echo -e "${BLUE}Running pre-commit validations...${NC}"
 
-# Run README validation
+# Track validation status
+VALIDATION_PASSED=true
+
+echo -e "\n${YELLOW}1. Security scan...${NC}"
+if ./scripts/system/security-scan.sh; then
+    echo -e "${GREEN}✓ Security scan passed${NC}"
+else
+    echo -e "${RED}✗ Security scan failed!${NC}"
+    echo -e "${YELLOW}Fix security issues before committing.${NC}"
+    VALIDATION_PASSED=false
+fi
+
+echo -e "\n${YELLOW}2. README validation...${NC}"
 if ./scripts/system/validate-readme.sh --validate; then
     echo -e "${GREEN}✓ README validation passed${NC}"
 else
     echo -e "${RED}✗ README validation failed!${NC}"
-    echo ""
     echo -e "${YELLOW}README is out of sync with repository structure.${NC}"
     echo -e "${YELLOW}Run: ./scripts/system/validate-readme.sh --update${NC}"
-    echo ""
-    echo -e "${RED}Commit blocked to prevent inconsistent documentation.${NC}"
-    exit 1
+    VALIDATION_PASSED=false
 fi
 
-echo -e "${GREEN}Pre-commit validation complete.${NC}"
+echo -e "\n${BLUE}Pre-commit validation summary:${NC}"
+if [[ "$VALIDATION_PASSED" == true ]]; then
+    echo -e "${GREEN}✓ All validations passed - commit allowed${NC}"
+    exit 0
+else
+    echo -e "${RED}✗ Validation failures detected - commit blocked${NC}"
+    echo -e "${YELLOW}Fix the issues above and try again.${NC}"
+    exit 1
+fi

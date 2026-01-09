@@ -1,0 +1,188 @@
+# HomeServer .gitignore - Prevent sensitive information from being committed
+
+## Security & Credentials
+*.key
+*.pem
+*.crt
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+known_hosts
+authorized_keys
+
+# API Keys and Tokens
+*api_token*
+*api_key*
+*secret*
+*credential*
+*.token
+cf_api_token.txt
+cloudflare_token.txt
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.template
+!.env.sample
+
+# Configuration with sensitive data
+config.ini
+config.toml
+secrets.yml
+secrets.yaml
+vault.yml
+vault.yaml
+
+## Docker & Container Secrets
+docker-compose.override.yml
+compose.override.yml
+compose.override.yaml
+docker-compose.override.yaml
+
+# Docker secrets
+docker/secrets/
+secrets/
+private/
+
+# Persistent data volumes
+data/
+volumes/
+storage/
+db_data/
+postgres_data/
+mysql_data/
+redis_data/
+authentik_data/
+
+# SSL/TLS Certificates
+certs/
+ssl/
+tls/
+letsencrypt/
+acme/
+*.pem
+*.crt
+*.key
+*.csr
+
+# Traefik specific
+services/traefik/data/acme.json
+services/traefik/data/dynamic.yml
+services/traefik/data/dynamic.yaml
+services/traefik/letsencrypt/
+
+# Authentik specific
+services/authentik/media/
+services/authentik/certs/
+services/authentik/geoip/
+
+# Media Stack specific
+services/media-stack/downloads/
+services/media-stack/movies/
+services/media-stack/tv/
+services/media-stack/music/
+services/media-stack/books/
+services/media-stack/config/
+torrents/
+downloads/
+
+# Nextcloud specific
+services/nextcloud/data/
+services/nextcloud/db/
+services/nextcloud/config/config.php
+
+# Portainer specific
+services/portainer/data/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+## Backup files
+*.backup
+*.bak
+*.old
+*.orig
+backup/
+backups/
+
+## Logs
+logs/
+*.log
+*.log.*
+
+## Temporary files
+tmp/
+temp/
+cache/
+.cache/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-*
+.emacs.d/
+.vim/
+
+# Development files
+node_modules/
+.npm/
+.yarn/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Git specific
+.git/
+*.patch
+
+## Custom patterns - Add project specific ignores below
+# VPN configs
+*.ovpn
+*.conf
+wireguard/
+openvpn/
+
+# Monitoring/metrics data
+prometheus/
+grafana/data/
+influxdb/data/
+
+# Terraform state (if using IaC)
+*.tfstate
+*.tfstate.backup
+.terraform/
+terraform.tfvars
+
+# Ansible vault files (if using configuration management)
+vault_pass.txt
+host_vars/*/vault.yml
+group_vars/*/vault.yml
+
+# SSH configs with hosts
+.ssh/config
+.ssh/known_hosts*
