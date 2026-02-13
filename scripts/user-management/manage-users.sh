@@ -78,6 +78,9 @@ function list_groups() {
 
 # Function to remove user
 function remove_user() {
+    # Temporarily disable exit on error for this function
+    set +e
+
     echo -e "\n${YELLOW}=== Remove User ===${NC}\n"
 
     # List users first
@@ -224,6 +227,9 @@ function remove_user() {
             rm -f /tmp/deluser_error.log /tmp/userdel_error.log
         fi
     fi
+
+    # Re-enable exit on error
+    set -e
 
     read -p "Press Enter to continue..."
 }
