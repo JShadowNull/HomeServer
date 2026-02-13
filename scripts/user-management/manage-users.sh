@@ -120,6 +120,45 @@ function remove_user() {
     echo -e "  Home: $user_home"
     echo -e "  Groups: $(groups $username 2>/dev/null | cut -d: -f2)"
 
+    # Check if user is logged in
+    echo -e "\n${YELLOW}Checking for active sessions...${NC}"
+    if who | grep -q "^$username "; then
+        echo -e "${RED}WARNING: User '$username' is currently logged in!${NC}"
+        who | grep "^$username "
+    fi
+
+    # Check for running processes
+    user_processes=$(ps -u "$username" -o pid= 2>/dev/null | wc -l)
+    if [[ $user_processes -gt 0 ]]; then
+        echo -e "${RED}WARNING: User '$username' has $user_processes running process(es)!${NC}"
+        echo -e "\n${YELLOW}Process list:${NC}"
+        ps -u "$username" -o pid,comm,args 2>/dev/null | head -20
+
+        echo -e "\n${YELLOW}Options:${NC}"
+        echo -e "  1) Kill all user processes and continue"
+        echo -e "  2) Cancel and manually handle processes"
+        read -p "Choose option (1/2): " process_option
+
+        if [[ "$process_option" == "1" ]]; then
+            echo -e "${YELLOW}Killing all processes for user '$username'...${NC}"
+            sudo pkill -9 -u "$username" 2>/dev/null || true
+            sleep 2
+
+            # Verify processes are killed
+            remaining=$(ps -u "$username" -o pid= 2>/dev/null | wc -l)
+            if [[ $remaining -gt 0 ]]; then
+                echo -e "${RED}Warning: $remaining process(es) still running${NC}"
+            else
+                echo -e "${GREEN}✓ All processes terminated${NC}"
+            fi
+        else
+            echo -e "${YELLOW}Cancelled. Please manually terminate processes and try again.${NC}"
+            echo -e "${CYAN}Tip: Use 'sudo pkill -u $username' or 'sudo killall -u $username'${NC}"
+            read -p "Press Enter to continue..."
+            return
+        fi
+    fi
+
     echo -e "\n${RED}This action cannot be undone!${NC}"
     read -p "Are you sure you want to remove this user? (type 'yes' to confirm): " confirm
 
@@ -133,27 +172,55 @@ function remove_user() {
     read -p "Remove home directory and mail spool? (y/n): " remove_home
 
     # Remove user
+    echo -e "\n${YELLOW}Removing user...${NC}"
+    removal_error=""
+
     if [[ "$remove_home" =~ ^[Yy]$ ]]; then
-        if sudo deluser --remove-home "$username" 2>/dev/null; then
+        if sudo deluser --remove-home "$username" 2>&1 | tee /tmp/deluser_error.log; then
             echo -e "${GREEN}✓ User '$username' removed with home directory${NC}"
         else
+            removal_error=$(cat /tmp/deluser_error.log)
             # Fallback to userdel if deluser fails
-            if sudo userdel -r "$username" 2>/dev/null; then
+            if sudo userdel -r "$username" 2>&1 | tee /tmp/userdel_error.log; then
                 echo -e "${GREEN}✓ User '$username' removed with home directory${NC}"
             else
+                removal_error="$removal_error\n$(cat /tmp/userdel_error.log)"
                 echo -e "${RED}Error: Failed to remove user${NC}"
+                echo -e "\n${YELLOW}Possible reasons:${NC}"
+                echo -e "  • User still has running processes"
+                echo -e "  • User is logged in on another terminal"
+                echo -e "  • Files are in use or locked"
+                echo -e "  • User's home directory is mounted or busy"
+                echo -e "\n${YELLOW}Error details:${NC}"
+                echo -e "$removal_error"
+                echo -e "\n${CYAN}Manual removal commands:${NC}"
+                echo -e "  sudo pkill -9 -u $username     # Kill all processes"
+                echo -e "  sudo userdel -r $username      # Remove user"
             fi
+            rm -f /tmp/deluser_error.log /tmp/userdel_error.log
         fi
     else
-        if sudo deluser "$username" 2>/dev/null; then
+        if sudo deluser "$username" 2>&1 | tee /tmp/deluser_error.log; then
             echo -e "${GREEN}✓ User '$username' removed (home directory kept at $user_home)${NC}"
         else
+            removal_error=$(cat /tmp/deluser_error.log)
             # Fallback to userdel if deluser fails
-            if sudo userdel "$username" 2>/dev/null; then
+            if sudo userdel "$username" 2>&1 | tee /tmp/userdel_error.log; then
                 echo -e "${GREEN}✓ User '$username' removed (home directory kept at $user_home)${NC}"
             else
+                removal_error="$removal_error\n$(cat /tmp/userdel_error.log)"
                 echo -e "${RED}Error: Failed to remove user${NC}"
+                echo -e "\n${YELLOW}Possible reasons:${NC}"
+                echo -e "  • User still has running processes"
+                echo -e "  • User is logged in on another terminal"
+                echo -e "  • Files are in use or locked"
+                echo -e "\n${YELLOW}Error details:${NC}"
+                echo -e "$removal_error"
+                echo -e "\n${CYAN}Manual removal commands:${NC}"
+                echo -e "  sudo pkill -9 -u $username     # Kill all processes"
+                echo -e "  sudo userdel $username         # Remove user"
             fi
+            rm -f /tmp/deluser_error.log /tmp/userdel_error.log
         fi
     fi
 
