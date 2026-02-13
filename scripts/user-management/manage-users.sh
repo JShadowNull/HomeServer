@@ -37,13 +37,13 @@ function list_users() {
     awk -F: '$3 >= 1000 && $1 != "nobody" {print $1 ":" $3 ":" $6}' /etc/passwd | while IFS=: read -r user uid home; do
         # Check if user has sudo
         sudo_status=""
-        if groups "$user" 2>/dev/null | grep -q '\bsudo\b'; then
+        if groups "$user" 2>/dev/null | grep -q '\bsudo\b' || false; then
             sudo_status="${RED}[SUDO]${NC}"
         fi
 
         # Check if user is in docker group
         docker_status=""
-        if groups "$user" 2>/dev/null | grep -q '\bdocker\b'; then
+        if groups "$user" 2>/dev/null | grep -q '\bdocker\b' || false; then
             docker_status="${BLUE}[DOCKER]${NC}"
         fi
 
@@ -109,7 +109,7 @@ function remove_user() {
     fi
 
     # Warn if user has sudo
-    if groups "$username" 2>/dev/null | grep -q '\bsudo\b'; then
+    if groups "$username" 2>/dev/null | grep -q '\bsudo\b' || false; then
         echo -e "${RED}WARNING: This user has sudo privileges!${NC}"
     fi
 
@@ -122,9 +122,10 @@ function remove_user() {
 
     # Check if user is logged in
     echo -e "\n${YELLOW}Checking for active sessions...${NC}"
-    if who | grep -q "^$username "; then
+    logged_in_check=$(who | grep "^$username " || true)
+    if [[ -n "$logged_in_check" ]]; then
         echo -e "${RED}WARNING: User '$username' is currently logged in!${NC}"
-        who | grep "^$username "
+        echo "$logged_in_check"
     fi
 
     # Check for running processes
@@ -320,7 +321,8 @@ function remove_user_from_group() {
     fi
 
     # Check if user is in group
-    if ! groups "$username" 2>/dev/null | grep -q "\b$groupname\b"; then
+    user_in_group=$(groups "$username" 2>/dev/null | grep "\b$groupname\b" || true)
+    if [[ -z "$user_in_group" ]]; then
         echo -e "${YELLOW}User '$username' is not in group '$groupname'${NC}"
         read -p "Press Enter to continue..."
         return
