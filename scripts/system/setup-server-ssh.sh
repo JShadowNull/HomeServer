@@ -41,7 +41,14 @@ read -p "Choose option (1/2): " key_option
 case $key_option in
     1)
         echo -e "\n${YELLOW}Using existing SSH key${NC}"
-        echo -e "${BLUE}Please paste your PUBLIC key (from ~/.ssh/id_ed25519.pub or similar):${NC}"
+        echo -e "\n${BLUE}=== How to get your public key ===${NC}"
+        echo -e "${YELLOW}If you only have the private key, extract the public key on your Mac:${NC}"
+        echo -e "  ${GREEN}ssh-keygen -y -f ~/.ssh/id_ed25519${NC}"
+        echo -e "  ${GREEN}ssh-keygen -y -f ~/.ssh/id_rsa${NC}"
+        echo -e "  ${GREEN}ssh-keygen -y -f ~/.ssh/server_key${NC}"
+        echo -e "\n${YELLOW}Or if you have the .pub file:${NC}"
+        echo -e "  ${GREEN}cat ~/.ssh/id_ed25519.pub${NC}"
+        echo -e "\n${BLUE}Please paste your PUBLIC key below:${NC}"
         echo -e "${YELLOW}(The key should start with 'ssh-ed25519' or 'ssh-rsa')${NC}"
         read -r public_key
 
